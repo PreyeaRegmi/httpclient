@@ -1,5 +1,6 @@
 package com.preyearegmi.httpclient;
 
+import com.preyearegmi.httpclient.abs.NetworkTask;
 import com.preyearegmi.httpclient.abs.RequestCompleteCallback;
 
 import java.io.*;
@@ -11,7 +12,7 @@ import java.util.Map;
 /**
  * Created by Nova on 2/25/2017.
  */
-public final class FormUploadTask implements Runnable {
+public final class FormUploadTask implements NetworkTask {
     private HttpURLConnection httpURLConnection = null;
     private URL urlObj = null;
     private Map<String, String> header = null;

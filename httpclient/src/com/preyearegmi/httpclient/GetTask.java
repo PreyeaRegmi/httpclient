@@ -1,11 +1,11 @@
 package com.preyearegmi.httpclient;
 
+import com.preyearegmi.httpclient.abs.NetworkTask;
 import com.preyearegmi.httpclient.abs.RequestCompleteCallback;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
@@ -13,21 +13,18 @@ import java.util.Map;
 /**
  * Created by preyea on 2/19/17.
  */
-public final class PostTask implements Runnable {
+public final class GetTask implements NetworkTask {
 
     HttpURLConnection httpURLConnection = null;
     URL urlObj = null;
     Map<String, String> header = null;
-    String body = null;
-    OutputStreamWriter outputStream;
-    InputStreamReader inputStream;
     RequestCompleteCallback requestCompleteCallback;
+    InputStreamReader inputStream;
 
 
-    protected PostTask(URL url, Map<String, String> head, String bdy, RequestCompleteCallback listener) {
+    protected GetTask(URL url, Map<String, String> head, RequestCompleteCallback listener) {
         urlObj = url;
         header = head;
-        body = bdy;
         requestCompleteCallback = listener;
     }
 
@@ -35,9 +32,8 @@ public final class PostTask implements Runnable {
     public void run() {
         try {
             httpURLConnection = (HttpURLConnection) urlObj.openConnection();
-            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestMethod("GET");
             httpURLConnection.setConnectTimeout(10000);
-            httpURLConnection.setDoInput(true);
             httpURLConnection.setDoOutput(true);
 
             //Set header if provided
@@ -50,19 +46,13 @@ public final class PostTask implements Runnable {
 
             httpURLConnection.connect();
 
-            //Send body if provided
-            if (body == null)
-                body = "";
-            outputStream = new OutputStreamWriter(httpURLConnection.getOutputStream());
-            outputStream.write(body);
-            outputStream.flush();
-
+            int rcode = httpURLConnection.getResponseCode();
 
             StringBuilder sb = new StringBuilder();
 
             HTTPResponse response = new HTTPResponse();
 
-            int rcode = httpURLConnection.getResponseCode();
+            response.setResponseCode(rcode);
 
             if (rcode > 199 && rcode < 300) {
                 inputStream = new InputStreamReader(httpURLConnection.getInputStream());
@@ -107,6 +97,7 @@ public final class PostTask implements Runnable {
 //                    });
                 }
             }
+
 
         } catch (IOException exception) {
             httpURLConnection.disconnect();

@@ -1,31 +1,33 @@
 package com.preyearegmi.httpclient;
 
-import com.preyearegmi.httpclient.abs.RequestCompleteCallback;
+import com.preyearegmi.httpclient.abs.FileDownloadCallback;
+import com.preyearegmi.httpclient.abs.NetworkTask;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Map;
 
 /**
- * Created by preyea on 2/19/17.
+ * Created by Nova on 2/19/2017.
  */
-public final class GetTask implements Runnable {
+public class GetFileTask implements NetworkTask {
 
     HttpURLConnection httpURLConnection = null;
     URL urlObj = null;
     Map<String, String> header = null;
-    RequestCompleteCallback requestCompleteCallback;
-    InputStreamReader inputStream;
+    FileDownloadCallback requestCompleteCallback;
+    InputStream inputStream;
 
 
-    protected GetTask(URL url, Map<String, String> head, RequestCompleteCallback listener) {
+    protected GetFileTask(URL url, Map<String, String> head, FileDownloadCallback listener) {
         urlObj = url;
         header = head;
         requestCompleteCallback = listener;
     }
+
 
     @Override
     public void run() {
@@ -47,29 +49,27 @@ public final class GetTask implements Runnable {
 
             int rcode = httpURLConnection.getResponseCode();
 
-            StringBuilder sb = new StringBuilder();
-
-            HTTPResponse response = new HTTPResponse();
-
-            response.setResponseCode(rcode);
-
             if (rcode > 199 && rcode < 300) {
-                inputStream = new InputStreamReader(httpURLConnection.getInputStream());
-                BufferedReader br = new BufferedReader(inputStream);
-                String line = null;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line);
+
+                inputStream = httpURLConnection.getInputStream();
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+
+                byte[] bArray = new byte[10240];
+                int n=-1;
+
+
+                while ((n = inputStream.read(bArray)) > 0) {
+                    byteStream.write(bArray, 0, n);
                 }
-                br.close();
-                response.setResponseCode(rcode);
-                response.setResponseBody(sb.toString());
+
                 httpURLConnection.disconnect();
-                if (requestCompleteCallback != null) {
+                if (requestCompleteCallback != null)
+                {
 //                    HTTPClient.getMainThreadHandler().post(new Runnable() {
 //                        @Override
 //                        public void run() {
 //                            try {
-//                                requestCompleteCallback.onSuccess(response);
+//                               requestCompleteCallback.onSuccess(byteStream.toByteArray());
 //                            }
 //                            catch(IllegalStateException ex)
 //                            {
@@ -78,6 +78,7 @@ public final class GetTask implements Runnable {
 //                        }
 //                    });
                 }
+
             } else {
                 httpURLConnection.disconnect();
                 if (requestCompleteCallback != null)
@@ -117,4 +118,6 @@ public final class GetTask implements Runnable {
             }
         }
     }
+
 }
+

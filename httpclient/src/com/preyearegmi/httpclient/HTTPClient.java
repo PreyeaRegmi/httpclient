@@ -1,6 +1,7 @@
 package com.preyearegmi.httpclient;
 
 import com.preyearegmi.httpclient.abs.FileDownloadCallback;
+import com.preyearegmi.httpclient.abs.NetworkTask;
 import com.preyearegmi.httpclient.abs.RequestCompleteCallback;
 
 import java.net.MalformedURLException;
@@ -25,8 +26,8 @@ public final class HTTPClient {
 //        return handler;
 //    }
 
-    public static synchronized Runnable request(String url, METHODTYPE methodType,Map<String, String> header,
-                                                String body, RequestCompleteCallback listener) {
+    public static synchronized NetworkTask request(String url, METHODTYPE methodType, Map<String, String> header,
+                                                   String body, RequestCompleteCallback listener) {
         URL urlObj;
         try {
             urlObj = new URL(url);
@@ -44,7 +45,7 @@ public final class HTTPClient {
         }
     }
 
-    public static synchronized Runnable getFile(String url, Map<String, String> header, FileDownloadCallback callback) {
+    public static synchronized NetworkTask getFile(String url, Map<String, String> header, FileDownloadCallback callback) {
         URL urlObj;
         try {
             urlObj = new URL(url);
@@ -56,7 +57,7 @@ public final class HTTPClient {
 
     }
 
-    public static synchronized Runnable formUpload(String url, Map<String, String> header, Map<String, String> body, String[] files, RequestCompleteCallback callback) {
+    public static synchronized NetworkTask formUpload(String url, Map<String, String> header, Map<String, String> body, String[] files, RequestCompleteCallback callback) {
         URL urlObj;
         try {
             urlObj = new URL(url);
