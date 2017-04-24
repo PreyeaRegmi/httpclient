@@ -12,6 +12,6 @@ A simple library to handle your common http request in simplest manner.
 <p>Yes there are some great http clients with outstanding performance and features. But sometimes when the size of our apk really matters, when we don't want any additional features and ship any transitive dependency with our app, then this might do the job.
  
 <h3>Details</h3>
-This library is built on top of HttpUrlConnection introduced in Java 7. Currently GET and POST http methods are only supported along with MULTIPART FORM UPLOAD. It features a default job scheduler to queue and perform network task in background thread. All files are uploaded in byte stream as default, so the server to which it is uploaded must handle the files accordingly.    
+This library is built on top of HttpUrlConnection introduced in Java 7. Currently GET and POST http methods are only supported along with MULTIPART FORM UPLOAD. It features a default job scheduler to queue and perform network task in background thread. All files are uploaded in binary as default, so the server to which it is uploaded must handle the files accordingly.    
 
 
