@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Created by Nova on 2/19/2017.
  */
-public class GetFileTask implements NetworkTask {
+ class GetFileTask implements NetworkTask {
 
     HttpURLConnection httpURLConnection = null;
     URL urlObj = null;
@@ -47,12 +47,12 @@ public class GetFileTask implements NetworkTask {
 
             httpURLConnection.connect();
 
-            int rcode = httpURLConnection.getResponseCode();
+            final int rcode = httpURLConnection.getResponseCode();
 
             if (rcode > 199 && rcode < 300) {
 
                 inputStream = httpURLConnection.getInputStream();
-                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
 
                 byte[] bArray = new byte[10240];
                 int n=-1;
@@ -65,56 +65,56 @@ public class GetFileTask implements NetworkTask {
                 httpURLConnection.disconnect();
                 if (requestCompleteCallback != null)
                 {
-//                    HTTPClient.getMainThreadHandler().post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                               requestCompleteCallback.onSuccess(byteStream.toByteArray());
-//                            }
-//                            catch(IllegalStateException ex)
-//                            {
-//                                //Enqueue message to the handler
-//                            }
-//                        }
-//                    });
+                    HTTPClient.getMainThreadHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                               requestCompleteCallback.onSuccess(byteStream.toByteArray());
+                            }
+                            catch(IllegalStateException ex)
+                            {
+                                //Enqueue message to the handler
+                            }
+                        }
+                    });
                 }
 
             } else {
                 httpURLConnection.disconnect();
                 if (requestCompleteCallback != null)
                 {
-//                    HTTPClient.getMainThreadHandler().post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                requestCompleteCallback.onFailed(rcode);
-//                            }
-//                            catch(IllegalStateException ex)
-//                            {
-//                                //Enqueue message to the handler
-//                            }
-//                        }
-//                    });
+                    HTTPClient.getMainThreadHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                requestCompleteCallback.onFailed(rcode);
+                            }
+                            catch(IllegalStateException ex)
+                            {
+                                //Enqueue message to the handler
+                            }
+                        }
+                    });
                 }
             }
 
 
-        } catch (IOException exception) {
+        } catch (final IOException exception) {
             httpURLConnection.disconnect();
             if (requestCompleteCallback != null)
             {
-//                HTTPClient.getMainThreadHandler().post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            requestCompleteCallback.onConnectionNotEstablished(exception.getMessage());
-//                        }
-//                        catch(IllegalStateException ex)
-//                        {
-//                            //Enqueue message to the handler
-//                        }
-//                    }
-//                });
+                HTTPClient.getMainThreadHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            requestCompleteCallback.onConnectionNotEstablished(exception.getMessage());
+                        }
+                        catch(IllegalStateException ex)
+                        {
+                            //Enqueue message to the handler
+                        }
+                    }
+                });
             }
         }
     }

@@ -3,16 +3,19 @@ package com.preyearegmi.httpclient;
 import com.preyearegmi.httpclient.abs.NetworkTask;
 import com.preyearegmi.httpclient.abs.RequestCompleteCallback;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.Files;
 import java.util.Map;
 
-/**
- * Created by Nova on 2/25/2017.
- */
-public final class FormUploadTask implements NetworkTask {
+
+ final class FormUploadTask implements NetworkTask {
     private HttpURLConnection httpURLConnection = null;
     private URL urlObj = null;
     private Map<String, String> header = null;
@@ -70,7 +73,9 @@ public final class FormUploadTask implements NetworkTask {
                     outputStream.writeBytes("Content-Disposition: form-data; name=\"file" + (index++) + "\";" + " filename=\"" + file.getName() + "\"" + crlf);
                     outputStream.writeBytes("Content-Transfer-Encoding: binary" + crlf);
 
-                    byte[] data = Files.readAllBytes(file.toPath());
+                    byte[] data = readBytesfromFile(file);
+                    if(data==null)
+                        throw new IllegalArgumentException("Invalid file path.");
                     outputStream.write(data, 0, data.length);
                 }
             }
@@ -92,9 +97,9 @@ public final class FormUploadTask implements NetworkTask {
             outputStream.flush();
 
             StringBuilder responseString = new StringBuilder();
-            HTTPResponse response = new HTTPResponse();
+            final HTTPResponse response = new HTTPResponse();
 
-            int rcode = httpURLConnection.getResponseCode();
+            final int rcode = httpURLConnection.getResponseCode();
 
             if (rcode > 199 && rcode < 300) {
                 InputStreamReader inputStream = new InputStreamReader(httpURLConnection.getInputStream());
@@ -109,60 +114,78 @@ public final class FormUploadTask implements NetworkTask {
                 httpURLConnection.disconnect();
                 if (requestCompleteCallback != null)
                 {
-//                    HTTPClient.getMainThreadHandler().post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                requestCompleteCallback.onSuccess(response);
-//                            }
-//                            catch(IllegalStateException ex)
-//                            {
-//                                //Enqueue message to the handler
-//                            }
-//                        }
-//                    });
+                    HTTPClient.getMainThreadHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                requestCompleteCallback.onSuccess(response);
+                            }
+                            catch(IllegalStateException ex)
+                            {
+                                //Enqueue message to the handler
+                            }
+                        }
+                    });
                 }
             } else {
                 httpURLConnection.disconnect();
                 if (requestCompleteCallback != null)
                 {
-//                    HTTPClient.getMainThreadHandler().post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            try {
-//                                requestCompleteCallback.onFailed(rcode);
-//                            }
-//                            catch(IllegalStateException ex)
-//                            {
-//                                //Enqueue message to the handler
-//                            }
-//                        }
-//                    });
+                    HTTPClient.getMainThreadHandler().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                requestCompleteCallback.onFailed(rcode);
+                            }
+                            catch(IllegalStateException ex)
+                            {
+                                //Enqueue message to the handler
+                            }
+                        }
+                    });
                 }
             }
 
 
-        } catch (IOException exception) {
+        } catch (final IOException exception) {
             httpURLConnection.disconnect();
             if (requestCompleteCallback != null)
             {
-//                HTTPClient.getMainThreadHandler().post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        try {
-//                            requestCompleteCallback.onConnectionNotEstablished(exception.getMessage());
-//                        }
-//                        catch(IllegalStateException ex)
-//                        {
-//                            //Enqueue message to the handler
-//                        }
-//                    }
-//                });
+                HTTPClient.getMainThreadHandler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            requestCompleteCallback.onConnectionNotEstablished(exception.getMessage());
+                        }
+                        catch(IllegalStateException ex)
+                        {
+                            //Enqueue message to the handler
+                        }
+                    }
+                });
             }
         }
     }
 
-    private File generateFileFromPath(String filePath) {
+    private byte[] readBytesfromFile(File file)  {
+        FileInputStream fileInputStream=null;
+        byte[] input=null;
+
+        try {
+            fileInputStream=new FileInputStream(file);
+             input = new byte[fileInputStream.available()];
+            while (fileInputStream.read(input) != -1) ;
+        }
+        catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return input;
+    }
+
+    private File generateFileFromPath(String filePath)  {
         File file;
         try
         {

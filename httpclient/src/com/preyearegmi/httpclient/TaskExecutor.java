@@ -5,7 +5,7 @@ import java.util.concurrent.*;
 /**
  * Created by preyea on 2/19/17.
  */
-public final class TaskExecutor implements Executor {
+ final class TaskExecutor implements Executor {
 
     private static TaskExecutor taskExecutor = null;
 

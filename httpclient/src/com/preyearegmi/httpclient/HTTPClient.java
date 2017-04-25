@@ -1,5 +1,9 @@
 package com.preyearegmi.httpclient;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+
 import com.preyearegmi.httpclient.abs.FileDownloadCallback;
 import com.preyearegmi.httpclient.abs.NetworkTask;
 import com.preyearegmi.httpclient.abs.RequestCompleteCallback;
@@ -13,18 +17,18 @@ import java.util.Map;
  */
 public final class HTTPClient {
 
-//    private static Handler handler = null;
-//
-//    static Handler getMainThreadHandler() {
-//        if (handler == null)
-//            handler = new Handler(Looper.getMainLooper()) {
-//                @Override
-//                public void handleMessage(Message msg) {
-//                    super.handleMessage(msg);
-//                }
-//            };
-//        return handler;
-//    }
+    private static Handler handler = null;
+
+    static Handler getMainThreadHandler() {
+        if (handler == null)
+            handler = new Handler(Looper.getMainLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    super.handleMessage(msg);
+                }
+            };
+        return handler;
+    }
 
     public static synchronized NetworkTask request(String url, METHODTYPE methodType, Map<String, String> header,
                                                    String body, RequestCompleteCallback listener) {
@@ -57,17 +61,17 @@ public final class HTTPClient {
 
     }
 
-    public static synchronized NetworkTask formUpload(String url, Map<String, String> header, Map<String, String> body, String[] files, RequestCompleteCallback callback) {
+    public static synchronized NetworkTask formUpload(String url, Map<String, String> header, Map<String, String> body, String[] filePaths, RequestCompleteCallback callback) {
         URL urlObj;
         try {
             urlObj = new URL(url);
         } catch (MalformedURLException ex) {
             throw new IllegalArgumentException("Invalid Url: " + url);
         }
-        return new FormUploadTask(urlObj, header, body, files, callback);
+        return new FormUploadTask(urlObj, header, body, filePaths, callback);
     }
 
-    public static void enqueue(Runnable command) {
+    public static void enqueue(NetworkTask command) {
         if (command instanceof GetTask || command instanceof PostTask || command instanceof GetFileTask || command instanceof FormUploadTask)
             TaskExecutor.getTaskExecutor().execute(command);
         else
